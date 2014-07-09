@@ -1,6 +1,8 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -29,8 +31,16 @@ namespace DoublePendulumSim
         private Ellipse myCircle1 = new Ellipse { Fill = Brushes.Black };
         private Ellipse myCircle2 = new Ellipse { Fill = Brushes.Black };
 
-        public Pendulum(Canvas canvas)
+        private Canvas _canvas;
+        private InkCanvas _ink;
+        public StylusPointCollection col;
+        public Stroke stroke;
+
+        public Pendulum(Canvas canvas, InkCanvas ink)
         {
+            _canvas = canvas;
+            _ink = ink;
+
             canvas.Children.Add(myLine1);
             canvas.Children.Add(myLine2);
             canvas.Children.Add(myCircle1);
@@ -69,6 +79,20 @@ namespace DoublePendulumSim
             SetPosition(myCircle2, myCircle2x - m2, myCircle2y - m2);
             SetPosition(myLine1, X0, Y0, myCircle1x, myCircle1y);
             SetPosition(myLine2, myCircle1x, myCircle1y, myCircle2x, myCircle2y);
+
+            var sp = new StylusPoint(myCircle2x, myCircle2y);
+            if (col == null)
+            {
+                col = new StylusPointCollection();
+                col.Add(sp);
+                stroke = new Stroke(col);
+                stroke.DrawingAttributes.Color = Colors.Gray;
+                _ink.Strokes.Add(stroke);
+            }
+            else
+            {
+                col.Add(sp);
+            }
         }
 
         public void Animate()
