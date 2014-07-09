@@ -30,18 +30,25 @@ namespace DoublePendulumSim
         public Ellipse myCircle1;
         public Ellipse myCircle2;
 
-        public Pendulum(Canvas canvas)
+        public Pendulum(Canvas canvas, double m1, double m2, double Phi1, double Phi2)
+        {
+            this.m1 = m1;
+            this.m2 = m2;
+            this.Phi1 = Phi1;
+            this.Phi2 = Phi2;
+            Create(canvas);
+        }
+
+        public void Create(Canvas canvas)
         {
             myLine1 = new Line { X1 = X0, Y1 = Y0, X2 = 0, Y2 = 0, StrokeThickness = 5, Stroke = Brushes.Red };
             myLine2 = new Line { X1 = 0, Y1 = 0, X2 = 0, Y2 = 0, StrokeThickness = 5, Stroke = Brushes.Red };
             myCircle1 = new Ellipse { Width = 2*m1, Height = 2*m1, Fill = Brushes.Black };
             myCircle2 = new Ellipse { Width = 2*m2, Height = 2*m2, Fill = Brushes.Black };
-
-            Canvas.SetLeft(myCircle1, X0+l1*Math.Sin(Phi1));
-            Canvas.SetTop(myCircle1, Y0+l1*Math.Cos(Phi1));
-            Canvas.SetLeft(myCircle2, X0+l1*Math.Sin(Phi1)+l2*Math.Sin(Phi2));
-            Canvas.SetTop(myCircle2, Y0+l1*Math.Cos(Phi1)+l2*Math.Cos(Phi2));
-
+            Canvas.SetLeft(myCircle1, X0+l1*Math.Sin(Phi1) - m1);
+            Canvas.SetTop(myCircle1, Y0+l1*Math.Cos(Phi1) - m1);
+            Canvas.SetLeft(myCircle2, X0+l1*Math.Sin(Phi1)+l2*Math.Sin(Phi2) - m2);
+            Canvas.SetTop(myCircle2, Y0+l1*Math.Cos(Phi1)+l2*Math.Cos(Phi2) - m2);
             canvas.Children.Add(myLine1);
             canvas.Children.Add(myLine2);
             canvas.Children.Add(myCircle1);
@@ -65,8 +72,8 @@ namespace DoublePendulumSim
 
               Canvas.SetLeft(myCircle1, myCircle1x - m1);
               Canvas.SetTop(myCircle1, myCircle1y - m1);
-              Canvas.SetLeft(myCircle2, myCircle2x - m1);
-              Canvas.SetTop(myCircle2, myCircle2y - m1);
+              Canvas.SetLeft(myCircle2, myCircle2x - m2);
+              Canvas.SetTop(myCircle2, myCircle2y - m2);
 
               myLine1.X2  = myCircle1x;
               myLine1.Y2  = myCircle1y;
@@ -84,7 +91,7 @@ namespace DoublePendulumSim
         public MainWindow()
         {
             InitializeComponent();
-            var pendulum = new Pendulum(this.myCanvas) { m1 = 10, m2 = 10, Phi1 = 0*(Math.PI)/2, Phi2 = 2.3*(Math.PI)/2 };
+            var pendulum = new Pendulum(this.myCanvas, m1: 10, m2: 10, Phi1: 0*(Math.PI)/2, Phi2: 2.3*(Math.PI)/2);
             this.Loaded += (sender, e) =>  this.timer = new System.Threading.Timer((state) => Dispatcher.Invoke(() => pendulum.Animate()), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(5));
             this.Closed += (sender , e) => timer.Dispose();
         }
