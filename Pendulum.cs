@@ -76,8 +76,8 @@ namespace DoublePendulumSim
             lock(this)
             {
                 double mu = 1+m1/m2;
-                d2Phi1 = Calcd2Phi1(mu);
-                d2Phi2 = Calcd2Phi2(mu);
+                d2Phi1 = Calc_d2Phi1(mu);
+                d2Phi2 = Calc_d2Phi2(mu);
                 dPhi1 += d2Phi1*time;
                 dPhi2 += d2Phi2*time;
                 Phi1  += dPhi1*time;
@@ -86,14 +86,37 @@ namespace DoublePendulumSim
             }
         }
 
-        private double Calcd2Phi1(double mu)
+        private double Calc_d2Phi1(double mu)
         {
-            return (g * (Math.Sin(Phi2) * Math.Cos(Phi1 - Phi2) - mu * Math.Sin(Phi1)) - (l2 * dPhi2 * dPhi2 + l1 * dPhi1 * dPhi1 * Math.Cos(Phi1 - Phi2)) * Math.Sin(Phi1 - Phi2)) / (l1 * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2)));
+            return 
+                (
+                    g 
+                    * (Math.Sin(Phi2) * Math.Cos(Phi1 - Phi2) - mu * Math.Sin(Phi1)) 
+                    - (l2 * dPhi2 * dPhi2 + l1 * dPhi1 * dPhi1 * Math.Cos(Phi1 - Phi2)) 
+                    * Math.Sin(Phi1 - Phi2)
+                ) 
+                / 
+                (
+                    l1 
+                    * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2))
+                );
         }
 
-        private double Calcd2Phi2(double mu)
+        private double Calc_d2Phi2(double mu)
         {
-            return (mu * g * (Math.Sin(Phi1) * Math.Cos(Phi1 - Phi2) - Math.Sin(Phi2)) + (mu * l1 * dPhi1 * dPhi1 + l2 * dPhi2 * dPhi2 * Math.Cos(Phi1 - Phi2)) * Math.Sin(Phi1 - Phi2)) / (l2 * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2)));
+            return 
+                (   
+                    mu 
+                    * g 
+                    * (Math.Sin(Phi1) * Math.Cos(Phi1 - Phi2) - Math.Sin(Phi2)) 
+                    + (mu * l1 * dPhi1 * dPhi1 + l2 * dPhi2 * dPhi2 * Math.Cos(Phi1 - Phi2)) 
+                    * Math.Sin(Phi1 - Phi2)
+                ) 
+                / 
+                (
+                    l2 
+                    * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2))
+                );
         }
     }
 }
