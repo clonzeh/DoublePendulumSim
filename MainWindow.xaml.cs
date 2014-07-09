@@ -1,110 +1,77 @@
-using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
-
-namespace DoublePendulumSim
-{
-    public class Pendulum
-    {
-        //Physics Constants
-        private double d2Phi1 = 0;
-        private double d2Phi2 = 0;
-        private double dPhi1  = 0;
-        private double dPhi2  = 0;
-        public double Phi1    = 0*(Math.PI)/2;
-        public double Phi2    = 2.3*(Math.PI)/2;
-        public double m1      = 10;
-        public double m2      = 10;
-        private double l1     = 150;
-        private double l2     = 150;
-        private double X0     = 350;
-        private double Y0     = 60;
-        private double g      = 9.8;
-        private double time   = 0.05;
-
-        private Line myLine1 = new Line { StrokeThickness = 5, Stroke = Brushes.Red };
-        private Line myLine2 = new Line { StrokeThickness = 5, Stroke = Brushes.Red };
-        private Ellipse myCircle1 = new Ellipse { Fill = Brushes.Black };
-        private Ellipse myCircle2 = new Ellipse { Fill = Brushes.Black };
-
-        public Pendulum(Canvas canvas)
-        {
-            canvas.Children.Add(myLine1);
-            canvas.Children.Add(myLine2);
-            canvas.Children.Add(myCircle1);
-            canvas.Children.Add(myCircle2);
-        }
-
-        public void Update()
-        {
-            myCircle1.Width = 2*m1;
-            myCircle1.Height = 2*m1;
-            myCircle2.Width = 2*m2;
-            myCircle2.Height = 2*m2;
-            double myCircle1x = X0+l1*Math.Sin(Phi1);
-            double myCircle1y = Y0+l1*Math.Cos(Phi1);
-            double myCircle2x = X0+l1*Math.Sin(Phi1)+l2*Math.Sin(Phi2);
-            double myCircle2y = Y0+l1*Math.Cos(Phi1)+l2*Math.Cos(Phi2);
-            Canvas.SetLeft(myCircle1, myCircle1x - m1);
-            Canvas.SetTop(myCircle1, myCircle1y - m1);
-            Canvas.SetLeft(myCircle2, myCircle2x - m2);
-            Canvas.SetTop(myCircle2, myCircle2y - m2);
-            myLine1.X1 = X0;
-            myLine1.Y1 = Y0;
-            myLine1.X2 = myCircle1x;
-            myLine1.Y2 = myCircle1y;
-            myLine2.X1 = myCircle1x;
-            myLine2.Y1 = myCircle1y;
-            myLine2.X2 = myCircle2x;
-            myLine2.Y2 = myCircle2y;
-        }
-
-        public void Animate()
-        {
-            lock(this)
-            {
-                double mu = 1+m1/m2;
-                d2Phi1    = (g*(Math.Sin(Phi2)*Math.Cos(Phi1-Phi2)-mu*Math.Sin(Phi1))-(l2*dPhi2*dPhi2+l1*dPhi1*dPhi1*Math.Cos(Phi1-Phi2))*Math.Sin(Phi1-Phi2))/(l1*(mu-Math.Cos(Phi1-Phi2)*Math.Cos(Phi1-Phi2)));
-                d2Phi2    = (mu*g*(Math.Sin(Phi1)*Math.Cos(Phi1-Phi2)-Math.Sin(Phi2))+(mu*l1*dPhi1*dPhi1+l2*dPhi2*dPhi2*Math.Cos(Phi1-Phi2))*Math.Sin(Phi1-Phi2))/(l2*(mu-Math.Cos(Phi1-Phi2)*Math.Cos(Phi1-Phi2)));
-                dPhi1     += d2Phi1*time;
-                dPhi2     += d2Phi2*time;
-                Phi1      += dPhi1*time;
-                Phi2      += dPhi2*time;
-                Update();
-            }
-        }
-    }
-
-    public partial class MainWindow : Window
-    {
-        private System.Threading.Timer timer;
-        private Pendulum pendulum;
-
-        public MainWindow()
-        {
-            InitializeComponent();
-            pendulum = new Pendulum(this.myCanvas) { m1 = 10, m2 = 10, Phi1 = 0*(Math.PI)/2, Phi2 = 2.3*(Math.PI)/2 };
-            pendulum.Update();
-            this.Loaded += (sender, e) =>  this.timer = new System.Threading.Timer((state) => Dispatcher.Invoke(() => pendulum.Animate()), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(5));
-            this.Closed += (sender , e) => timer.Dispose();
-        }
-
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (pendulum != null)
-            {
-                lock(pendulum)
-                {
-                    pendulum.m1 = mass1.Value;
-                    pendulum.m2 = mass2.Value;
-                    pendulum.Phi1 = Phi1.Value / 180 * Math.PI;
-                    pendulum.Phi2 = Phi2.Value / 180 * Math.PI;
-                    pendulum.Update();
-                    timer.Change(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(5));
-                }
-            }
-        }
-    }
-}
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{290D7D7E-F47E-4C91-AEAD-2D7455C8A2E3}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DoublePendulumSim</RootNamespace>
+    <AssemblyName>pendulum</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pendulum.cs"/>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
