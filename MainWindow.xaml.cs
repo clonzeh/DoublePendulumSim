@@ -93,15 +93,17 @@ namespace DoublePendulumSim
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (pendulum == null) return;
-            lock(pendulum)
+            if (pendulum != null)
             {
-                pendulum.m1 = mass1.Value;
-                pendulum.m2 = mass2.Value;
-                pendulum.Phi1 = Phi1.Value / 180 * Math.PI;
-                pendulum.Phi2 = Phi2.Value / 180 * Math.PI;
-                pendulum.Update();
-                timer.Change(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(5));
+                lock(pendulum)
+                {
+                    pendulum.m1 = mass1.Value;
+                    pendulum.m2 = mass2.Value;
+                    pendulum.Phi1 = Phi1.Value / 180 * Math.PI;
+                    pendulum.Phi2 = Phi2.Value / 180 * Math.PI;
+                    pendulum.Update();
+                    timer.Change(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(5));
+                }
             }
         }
     }
