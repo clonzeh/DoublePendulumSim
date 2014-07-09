@@ -22,13 +22,13 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Mass1:" Margin="1,1,4,1"/>
-            <Slider x:Name="mass1" Minimum="1" Maximum="50" Value="10" Grid.Column="1" Grid.Row="1" Margin="1" ValueChanged="Slider_ValueChanged"/>
+            <Slider x:Name="mass1" Minimum="1" Maximum="50" Value="10" Grid.Column="1" Grid.Row="1" Margin="1"/>
             <TextBlock Grid.Column="0" Grid.Row="2" Text="Mass2:"  Margin="1,1,4,1"/>
-            <Slider x:Name="mass2" Minimum="1" Maximum="50" Value="10" Grid.Column="1" Grid.Row="2" Margin="1" ValueChanged="Slider_ValueChanged"/>
+            <Slider x:Name="mass2" Minimum="1" Maximum="50" Value="10" Grid.Column="1" Grid.Row="2" Margin="1"/>
             <TextBlock Grid.Column="0" Grid.Row="3" Text="Phi1 (in deg):" Margin="1,1,4,1"/>
-            <Slider x:Name="Phi1" Minimum="0" Maximum="90" Value="50" Grid.Column="1" Grid.Row="3" Margin="1" ValueChanged="Slider_ValueChanged"/>
+            <Slider x:Name="Phi1" Minimum="0" Maximum="90" Value="50" Grid.Column="1" Grid.Row="3" Margin="1"/>
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Phi2 (in deg):" Margin="1,1,4,1"/>
-            <Slider x:Name="Phi2" Minimum="0" Maximum="90" Value="65" Grid.Column="1" Grid.Row="4" Margin="1" ValueChanged="Slider_ValueChanged"/>
+            <Slider x:Name="Phi2" Minimum="0" Maximum="90" Value="65" Grid.Column="1" Grid.Row="4" Margin="1"/>
         </Grid>
         <Canvas x:Name="myCanvas" Grid.Column="1"/>
     </Grid>
