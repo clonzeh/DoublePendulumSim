@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Media;
 
 namespace DoublePendulumSim
 {
@@ -8,7 +9,7 @@ namespace DoublePendulumSim
         public MainWindow()
         {
             InitializeComponent();
-            var pendulum = new Pendulum(this.myCanvas) { m1 = 10, m2 = 10, Phi1 = 0*(Math.PI)/2, Phi2 = 2.3*(Math.PI)/2 };
+            var pendulum = new Pendulum(this.myCanvas, this.ink) { m1 = 10, m2 = 10, Phi1 = 0*(Math.PI)/2, Phi2 = 2.3*(Math.PI)/2 };
             pendulum.Update();
             var timer = new System.Threading.Timer((state) => Dispatcher.Invoke(() => pendulum.Animate()), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(5));
             var changed = new RoutedPropertyChangedEventHandler<double>((sender, e) =>
@@ -22,6 +23,9 @@ namespace DoublePendulumSim
                         pendulum.Phi1 = Phi1.Value / 180 * Math.PI;
                         pendulum.Phi2 = Phi2.Value / 180 * Math.PI;
                         pendulum.Update();
+                        pendulum.col = null;
+                        ink.Strokes.Remove(pendulum.stroke);
+                        //pendulum.stroke.DrawingAttributes.Color = Colors.LightGray;
                         timer.Change(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(5));
                     }
                 }

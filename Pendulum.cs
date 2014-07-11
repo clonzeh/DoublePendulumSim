@@ -1,5 +1,8 @@
 using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -28,36 +31,68 @@ namespace DoublePendulumSim
         private Ellipse myCircle1 = new Ellipse { Fill = Brushes.Black };
         private Ellipse myCircle2 = new Ellipse { Fill = Brushes.Black };
 
-        public Pendulum(Canvas canvas)
+        private Canvas _canvas;
+        private InkCanvas _ink;
+        public StylusPointCollection col;
+        public Stroke stroke;
+
+        public Pendulum(Canvas canvas, InkCanvas ink)
         {
+            _canvas = canvas;
+            _ink = ink;
+
             canvas.Children.Add(myLine1);
             canvas.Children.Add(myLine2);
             canvas.Children.Add(myCircle1);
             canvas.Children.Add(myCircle2);
         }
 
+        private void SetSize(FrameworkElement element, double size)
+        {
+            element.Width = size;
+            element.Height = size;
+        }
+
+        public void SetPosition(UIElement element, double x, double y)
+        {
+            Canvas.SetLeft(element, x);
+            Canvas.SetTop(element, y);
+        }
+
+        public void SetPosition(Line line, double x1, double y1, double x2, double y2)
+        {
+            line.X1 = x1;
+            line.Y1 = y1;
+            line.X2 = x2;
+            line.Y2 = y2;
+        }
+
         public void Update()
         {
-            myCircle1.Width = 2*m1;
-            myCircle1.Height = 2*m1;
-            myCircle2.Width = 2*m2;
-            myCircle2.Height = 2*m2;
-            double myCircle1x = X0+l1*Math.Sin(Phi1);
-            double myCircle1y = Y0+l1*Math.Cos(Phi1);
-            double myCircle2x = X0+l1*Math.Sin(Phi1)+l2*Math.Sin(Phi2);
-            double myCircle2y = Y0+l1*Math.Cos(Phi1)+l2*Math.Cos(Phi2);
-            Canvas.SetLeft(myCircle1, myCircle1x - m1);
-            Canvas.SetTop(myCircle1, myCircle1y - m1);
-            Canvas.SetLeft(myCircle2, myCircle2x - m2);
-            Canvas.SetTop(myCircle2, myCircle2y - m2);
-            myLine1.X1 = X0;
-            myLine1.Y1 = Y0;
-            myLine1.X2 = myCircle1x;
-            myLine1.Y2 = myCircle1y;
-            myLine2.X1 = myCircle1x;
-            myLine2.Y1 = myCircle1y;
-            myLine2.X2 = myCircle2x;
-            myLine2.Y2 = myCircle2y;
+            double myCircle1x = X0 + l1 * Math.Sin(Phi1);
+            double myCircle1y = Y0 + l1 * Math.Cos(Phi1);
+            double myCircle2x = myCircle1x + l2 * Math.Sin(Phi2);
+            double myCircle2y = myCircle1y + l2 * Math.Cos(Phi2);
+            SetSize(myCircle1, 2 * m1);
+            SetSize(myCircle2, 2 * m2);
+            SetPosition(myCircle1, myCircle1x - m1, myCircle1y - m1);
+            SetPosition(myCircle2, myCircle2x - m2, myCircle2y - m2);
+            SetPosition(myLine1, X0, Y0, myCircle1x, myCircle1y);
+            SetPosition(myLine2, myCircle1x, myCircle1y, myCircle2x, myCircle2y);
+
+            var sp = new StylusPoint(myCircle2x, myCircle2y);
+            if (col == null)
+            {
+                col = new StylusPointCollection();
+                col.Add(sp);
+                stroke = new Stroke(col);
+                stroke.DrawingAttributes.Color = Colors.Gray;
+                _ink.Strokes.Add(stroke);
+            }
+            else
+            {
+                col.Add(sp);
+            }
         }
 
         public void Animate()
@@ -65,14 +100,47 @@ namespace DoublePendulumSim
             lock(this)
             {
                 double mu = 1+m1/m2;
-                d2Phi1    = (g*(Math.Sin(Phi2)*Math.Cos(Phi1-Phi2)-mu*Math.Sin(Phi1))-(l2*dPhi2*dPhi2+l1*dPhi1*dPhi1*Math.Cos(Phi1-Phi2))*Math.Sin(Phi1-Phi2))/(l1*(mu-Math.Cos(Phi1-Phi2)*Math.Cos(Phi1-Phi2)));
-                d2Phi2    = (mu*g*(Math.Sin(Phi1)*Math.Cos(Phi1-Phi2)-Math.Sin(Phi2))+(mu*l1*dPhi1*dPhi1+l2*dPhi2*dPhi2*Math.Cos(Phi1-Phi2))*Math.Sin(Phi1-Phi2))/(l2*(mu-Math.Cos(Phi1-Phi2)*Math.Cos(Phi1-Phi2)));
-                dPhi1     += d2Phi1*time;
-                dPhi2     += d2Phi2*time;
-                Phi1      += dPhi1*time;
-                Phi2      += dPhi2*time;
+                d2Phi1 = Calc_d2Phi1(mu);
+                d2Phi2 = Calc_d2Phi2(mu);
+                dPhi1 += d2Phi1*time;
+                dPhi2 += d2Phi2*time;
+                Phi1  += dPhi1*time;
+                Phi2  += dPhi2*time;
                 Update();
             }
+        }
+
+        private double Calc_d2Phi1(double mu)
+        {
+            return 
+                (
+                    g 
+                    * (Math.Sin(Phi2) * Math.Cos(Phi1 - Phi2) - mu * Math.Sin(Phi1)) 
+                    - (l2 * dPhi2 * dPhi2 + l1 * dPhi1 * dPhi1 * Math.Cos(Phi1 - Phi2)) 
+                    * Math.Sin(Phi1 - Phi2)
+                ) 
+                / 
+                (
+                    l1 
+                    * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2))
+                );
+        }
+
+        private double Calc_d2Phi2(double mu)
+        {
+            return 
+                (   
+                    mu 
+                    * g 
+                    * (Math.Sin(Phi1) * Math.Cos(Phi1 - Phi2) - Math.Sin(Phi2)) 
+                    + (mu * l1 * dPhi1 * dPhi1 + l2 * dPhi2 * dPhi2 * Math.Cos(Phi1 - Phi2)) 
+                    * Math.Sin(Phi1 - Phi2)
+                ) 
+                / 
+                (
+                    l2 
+                    * (mu - Math.Cos(Phi1 - Phi2) * Math.Cos(Phi1 - Phi2))
+                );
         }
     }
 }
