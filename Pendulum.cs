@@ -1,6 +1,7 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -83,13 +84,16 @@ namespace DoublePendulumSim
             SetPosition(myLine2, myCircle1x, myCircle1y, myCircle2x, myCircle2y);
 
             var sp = new StylusPoint(myCircle2x, myCircle2y);
-            if (col == null)
+            if (col == null || col.Count >= 1000)
             {
-                col = new StylusPointCollection();
-                col.Add(sp);
-                stroke = new Stroke(col);
+                var ncol = new StylusPointCollection();
+                if (col != null)
+                    ncol.Add(col.Last());
+                ncol.Add(sp);
+                stroke = new Stroke(ncol); 
                 stroke.DrawingAttributes.Color = Colors.Gray;
                 _ink.Strokes.Add(stroke);
+                col = ncol;
             }
             else
             {
